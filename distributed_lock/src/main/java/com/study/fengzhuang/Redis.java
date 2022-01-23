@@ -11,17 +11,15 @@ public class Redis {
 
         //连接池最大的空闲数
         config.setMaxIdle(300);
-        //连接池最大空闲数
-        config.setMaxIdle(300);
         //最大连接数
         config.setMaxTotal(1000);
         //连接最大等待时间，如果是 -1 表示没有限制
-        config.setMaxWaitMillis(30000);
+        config.setMaxWaitMillis(90000);
         //在空闲时检查有效性
         config.setTestOnBorrow(true);
 
                                        // redis 地址 端口，超时时间，密码
-        pool=new JedisPool(config,"47.98.151.231",6379,300,"y123p456");
+        pool=new JedisPool(config,"47.98.151.231",6379,300000,"y123p456");
 
     }
     public void execute(CallWithJedis callWithJedis){
