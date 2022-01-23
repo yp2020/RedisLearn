@@ -2,11 +2,14 @@ package com.study.delayqueue;
 
 import com.study.fengzhuang.Redis;
 
+import java.sql.ResultSet;
+import java.util.concurrent.DelayQueue;
+
 /**
  * @author yang
- * @date 2022/01/17 21:52
+ * @date 2022/01/23 15:15
  **/
-public class DelayMsgTest {
+public class DelayTest {
     public static void main(String[] args) {
         Redis redis=new Redis();
         redis.execute(jedis -> {
@@ -29,7 +32,7 @@ public class DelayMsgTest {
             Thread consumer =new Thread(){
                 @Override
                 public void run() {
-                    delayMsgQueue.loopQueue();
+                    delayMsgQueue.OutQueue();
                 }
             };
 

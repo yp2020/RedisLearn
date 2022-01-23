@@ -1,44 +1,43 @@
 package com.study.delayqueue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DatabindContext;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import redis.clients.jedis.Jedis;
 
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.DelayQueue;
 
 /**
- * 消息队列
  * @author yang
- * @date 2022/01/17 21:43
+ * @date 2022/01/23 15:07
  **/
-
 public class DelayMsgQueue {
 
-    private Jedis jedis;
-    private String keyQueue;
+    private  Jedis jedis;
+    private String queue;
 
-    public DelayMsgQueue(Jedis jedis, String keyQueue) {
-        this.jedis = jedis;
-        this.keyQueue = keyQueue;
+    public DelayMsgQueue(Jedis jedis,String queue){
+        this.jedis=jedis;
+        this.queue=queue;
     }
 
-
     /**
-     * 发送消息
+     * 消息入队列
      * @param data
      */
     public void InQueue(Object data){
-        Message msg=new Message();
-        msg.setId(UUID.randomUUID().toString());
+        MyMessage msg=new MyMessage();
         msg.setData(data);
-        try {
-            String s = new ObjectMapper().writeValueAsString(msg);
-            System.out.println("发送消息: "+ s+ "发送时间"+new Date());
-            // 利用时间做为 分数
-            jedis.zadd(keyQueue,System.currentTimeMillis()+5000,s);
+        msg.setId(UUID.randomUUID().toString());
+        try{
+            String s=new ObjectMapper().writeValueAsString(msg);
+            System.out.println("消息入队列: "+s+new Date());
+
+            jedis.zadd(queue,System.currentTimeMillis()+5000,s);
+
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -48,12 +47,11 @@ public class DelayMsgQueue {
     /**
      * 消息消费
      */
-    public void loopQueue(){
+    public void OutQueue(){
         while(!Thread.interrupted()){
-            Set<String> zrangeByScore = jedis.zrangeByScore(keyQueue, 0, System.currentTimeMillis(), 0, 1);
-            if(zrangeByScore.isEmpty()){
-                //啥都没有
-                try {
+            Set<String> zrange= jedis.zrangeByScore(queue,0,System.currentTimeMillis(),0,1);
+            if(zrange.isEmpty()){
+                try{
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -61,17 +59,16 @@ public class DelayMsgQueue {
                 }
                 continue;
             }
-
-            String next = zrangeByScore.iterator().next();
-            if(jedis.zrem(keyQueue,next)>0){
-                try {
-                    Message msg = new ObjectMapper().readValue(next, Message.class);
-                    System.out.println("接收到消息: "+ msg+"接收时间: "+ new Date());
+            String next=zrange.iterator().next();
+            if(jedis.zrem(queue,next)>0){
+                try{
+                    MyMessage msg=new ObjectMapper().readValue(next,MyMessage.class);
+                    System.out.println("消息接收到了: "+msg);
+                } catch (JsonMappingException e) {
+                    e.printStackTrace();
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
-
-
             }
         }
     }

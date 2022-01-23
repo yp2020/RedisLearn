@@ -5,7 +5,7 @@ package com.study.delayqueue;
  * @author yang
  * @date 2022/01/17 21:42
  **/
-public class Message {
+public class MyMessage {
     private String id ;
     private Object data;
 
