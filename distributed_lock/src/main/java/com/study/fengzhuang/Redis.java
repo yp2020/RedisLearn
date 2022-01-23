@@ -1,4 +1,4 @@
-package com.study.distributed_lock;
+package com.study.fengzhuang;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.Jedis;

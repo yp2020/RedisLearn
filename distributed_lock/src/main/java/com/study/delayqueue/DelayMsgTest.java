@@ -1,6 +1,6 @@
 package com.study.delayqueue;
 
-import com.study.distributed_lock.Redis;
+import com.study.fengzhuang.Redis;
 
 /**
  * @author yang

@@ -1,5 +1,6 @@
 package com.study.distributed_lock;
 
+import com.study.fengzhuang.Redis;
 import redis.clients.jedis.params.SetParams;
 
 /**
@@ -8,19 +9,17 @@ import redis.clients.jedis.params.SetParams;
  **/
 public class LockTest {
     public static void main(String[] args) {
-        Redis redis = new Redis();
-        redis.execute(jedis -> {
-            String set = jedis.set("k1", "v1", new SetParams().nx().ex(5));
-            if(set!=null&& "OK".equals(set)){
-                jedis.expire("k1",5);
-                jedis.set("money", String.valueOf(100000));
-                System.out.println("money: "+jedis.get("money"));
-                // 释放资源
-                jedis.del("k1");
-            }
-            else{
-                //说明有其他线程占位置，需要停止操作
-            }
-        });
+      Redis redis=new Redis();
+      redis.execute(jedis -> {
+          Long setnx=jedis.setnx("k1","v1");
+          if(setnx==1){
+              jedis.set("name","ggb");
+              String name = jedis.get("name");
+              System.out.println("name: "+ name);
+              jedis.del("name");
+          }else{
+              System.out.println("有人占位停止操作");
+          }
+      });
     }
 }
